@@ -30,6 +30,7 @@ void compute_bilinear_pairings(
   Timers &timers);
 
 void compute_feasible_and_termination(
+  const El::BigFloat &primal_objective, const El::BigFloat &dual_objective,
   const Solver_Parameters &parameters, const El::BigFloat &primal_error,
   const El::BigFloat &dual_error, const El::BigFloat &duality_gap,
   const El::BigFloat &primal_step_length, const El::BigFloat &dual_step_length,
@@ -149,6 +150,7 @@ SDP_Solver::run(const Solver_Parameters &parameters,
 
       bool terminate_now, is_primal_and_dual_feasible;
       compute_feasible_and_termination(
+        primal_objective, dual_objective,
         parameters, primal_error(), dual_error, duality_gap,
         primal_step_length, dual_step_length, iteration,
         solver_timer.start_time, is_primal_and_dual_feasible, terminate_reason,
