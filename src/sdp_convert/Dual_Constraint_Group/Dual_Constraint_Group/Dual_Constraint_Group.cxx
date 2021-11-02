@@ -6,6 +6,7 @@
 //=======================================================================
 
 #include "../../Dual_Constraint_Group.hxx"
+#include <iostream>
 
 El::Matrix<El::BigFloat>
 sample_bilinear_basis(const int maxDegree, const int numSamples,
@@ -27,7 +28,9 @@ sample_bilinear_basis(const int maxDegree, const int numSamples,
 //
 Dual_Constraint_Group::Dual_Constraint_Group(const size_t &Block_index,
                                              const Polynomial_Vector_Matrix &m)
-    : block_index(Block_index), dim(m.rows), degree(m.sample_points.size() - 1)
+    : block_index(Block_index), dim(m.rows), degree(m.sample_points.size() - 1), 
+      bilinear_len_e(m.bilinear_basis.size()),
+      bilinear_len_o(m.bilinear_basis.size())
 {
   assert(m.rows == m.cols);
 
@@ -70,12 +73,22 @@ Dual_Constraint_Group::Dual_Constraint_Group(const size_t &Block_index,
   //   Y_1: {q_0(x), ..., q_delta1(x)}
   //   Y_2: {\sqrt(x) q_0(x), ..., \sqrt(x) q_delta2(x)
   //
-  const size_t delta1(degree / 2);
+  // const size_t delta1(degree / 2);
+  // size_t delta1 = bilinear_len_e;
+  if (bilinear_len_e - 1 > degree / 2)
+    {
+      bilinear_len_e = degree / 2 + 1;
+    }
   bilinear_bases[0] = sample_bilinear_basis(
-    delta1, numSamples, m.bilinear_basis, m.sample_points, m.sample_scalings);
+    bilinear_len_e - 1, numSamples, m.bilinear_basis, m.sample_points, m.sample_scalings);
 
   // For degree==0, the second block will have zero size.
-  const size_t delta2((degree + 1) / 2 - 1);
+  // const size_t delta2((degree + 1) / 2 - 1);
+  // size_t delta2 = bSize;
+  if (bilinear_len_o - 1 > (degree + 1) / 2 - 1)
+    {
+      bilinear_len_o = (degree + 1) / 2 - 1;
+    }
   // The \sqrt(x) factors can be accounted for by replacing the
   // scale factors s_k with x_k s_k.
   std::vector<El::BigFloat> scaled_samples;
@@ -84,5 +97,5 @@ Dual_Constraint_Group::Dual_Constraint_Group(const size_t &Block_index,
       scaled_samples.emplace_back(m.sample_points[ii] * m.sample_scalings[ii]);
     }
   bilinear_bases[1] = sample_bilinear_basis(
-    delta2, numSamples, m.bilinear_basis, m.sample_points, scaled_samples);
+    bilinear_len_o - 1, numSamples, m.bilinear_basis, m.sample_points, scaled_samples);
 }

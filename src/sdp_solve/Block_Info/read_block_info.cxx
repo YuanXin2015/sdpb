@@ -7,6 +7,13 @@
 
 #include <boost/filesystem/fstream.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+// #include <iostream>
+
+// Yuan to do: Add vector bilinear_len and make parser parse three things:
+//    (dim, num_points, bilinear_len)
+// dim is dimension of the Polynomial matrix
+// num_points is the degree of polynomial plus 1
+// bilinear_len is the length of the bilinear basis vector
 
 namespace
 {
@@ -14,8 +21,8 @@ namespace
       : public rapidjson::BaseReaderHandler<rapidjson::UTF8<>,
                                             Block_Info_Parser>
   {
-    bool parsing_dim = false, parsing_num_points = false;
-    int64_t dim = 0, num_points = 0;
+    bool parsing_dim = false, parsing_num_points = false, parsing_bilinear_len_e = false, parsing_bilinear_len_o = false;
+    int64_t dim = 0, num_points = 0, bilinear_len_e = 0, bilinear_len_o = 0;
 
     bool Null() { return true; }
     bool Bool(bool) { return true; }
@@ -31,6 +38,16 @@ namespace
         {
           num_points = value;
           parsing_num_points = false;
+        }
+      else if(parsing_bilinear_len_e)
+        {
+          bilinear_len_e = value;
+          parsing_bilinear_len_e = false;
+        }
+      else if(parsing_bilinear_len_o)
+        {
+          bilinear_len_o = value;
+          parsing_bilinear_len_o = false;
         }
       else
         {
@@ -59,6 +76,14 @@ namespace
         {
           parsing_num_points = true;
         }
+      else if("bilinear_len_e" == key)
+        {
+          parsing_bilinear_len_e = true;
+        }
+      else if("bilinear_len_o" == key)
+        {
+          parsing_bilinear_len_o = true;
+        }
       return true;
     }
     bool EndObject(rapidjson::SizeType) { return true; }
@@ -68,7 +93,10 @@ namespace
 
   void
   parse_block(const size_t &block_index, std::istream &block_stream,
-              std::vector<size_t> &dimensions, std::vector<size_t> &num_points)
+              std::vector<size_t> &dimensions, std::vector<size_t> &num_points,
+              std::vector<size_t> &bilinear_len_e,
+              std::vector<size_t> &bilinear_len_o
+            ) // Yuan
   {
     rapidjson::IStreamWrapper wrapper(block_stream);
     Block_Info_Parser parser;
@@ -80,7 +108,11 @@ namespace
                                  + std::to_string(block_index));
       }
     dimensions.at(block_index) = parser.dim;
+    // std::cout << block_index << std::endl;
+    // std::cout << parser.dim << std::endl;
     num_points.at(block_index) = parser.num_points;
+    bilinear_len_e.at(block_index) = parser.bilinear_len_e;
+    bilinear_len_o.at(block_index) = parser.bilinear_len_o;
   }
 
   size_t parse_num_blocks(std::istream &control_stream)
@@ -111,8 +143,10 @@ void Block_Info::read_block_info(const boost::filesystem::path &sdp_path)
           "Unable to find control.json in sdp input file");
       }());
 
-      dimensions.resize(num_blocks);
+      dimensions.resize(num_blocks); // Yuan
       num_points.resize(num_blocks);
+      bilinear_len_e.resize(num_blocks);
+      bilinear_len_o.resize(num_blocks);
 
       const std::string prefix("block_");
       Archive_Reader reader(sdp_path);
@@ -132,7 +166,7 @@ void Block_Info::read_block_info(const boost::filesystem::path &sdp_path)
                     + std::to_string(num_blocks - 1) + ".");
                 }
               std::istream stream(&reader);
-              parse_block(block_index, stream, dimensions, num_points);
+              parse_block(block_index, stream, dimensions, num_points, bilinear_len_e, bilinear_len_o); // Yuan
             }
         }
       for(size_t block_index(0); block_index != dimensions.size();
@@ -155,12 +189,14 @@ void Block_Info::read_block_info(const boost::filesystem::path &sdp_path)
 
       dimensions.resize(num_blocks);
       num_points.resize(num_blocks);
+      bilinear_len_e.resize(num_blocks);
+      bilinear_len_o.resize(num_blocks);
       for(size_t block(0); block != num_blocks; ++block)
         {
           boost::filesystem::path block_path(
             sdp_path / ("block_" + std::to_string(block) + ".json"));
           boost::filesystem::ifstream block_stream(block_path);
-          parse_block(block, block_stream, dimensions, num_points);
+          parse_block(block, block_stream, dimensions, num_points, bilinear_len_e, bilinear_len_o); // Yuan
         }
     }
 }

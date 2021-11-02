@@ -9,6 +9,14 @@
 
 #include <algorithm>
 
+
+// Yuan to do: Add vector bilinear_len 
+//    dim is dimension of the Polynomial matrix
+//    num_points is the degree of polynomial plus 1
+//    bilinear_len is the length of the bilinear basis vector
+// Change psd_matrix_block_sizes() to use bilinear_len instead of num_points
+
+
 struct MPI_Comm_Wrapper
 {
   El::mpi::Comm value;
@@ -46,6 +54,8 @@ public:
   boost::filesystem::path block_timings_filename;
   std::vector<size_t> dimensions;
   std::vector<size_t> num_points;
+  std::vector<size_t> bilinear_len_e;  // Yuan
+  std::vector<size_t> bilinear_len_o;
 
   std::vector<size_t> block_indices;
   MPI_Group_Wrapper mpi_group;
@@ -103,9 +113,12 @@ public:
       {
         // Need to round down (num_points+1)/2 before multiplying by
         // dim, since dim could be 2.
-        result[2 * index] = dimensions[index] * ((num_points[index] + 1) / 2);
+        // result[2 * index] = dimensions[index] * ((num_points[index] + 1) / 2);
+        result[2 * index] = dimensions[index] * bilinear_len_e[index];  // Yuan
+        // result[2 * index + 1]
+        //   = dimensions[index] * num_points[index] - result[2 * index];
         result[2 * index + 1]
-          = dimensions[index] * num_points[index] - result[2 * index];
+          = dimensions[index] * bilinear_len_o[index];
       }
     return result;
   }
@@ -127,6 +140,8 @@ namespace std
     swap(a.block_timings_filename, b.block_timings_filename);
     swap(a.dimensions, b.dimensions);
     swap(a.num_points, b.num_points);
+    swap(a.bilinear_len_e, b.bilinear_len_e); // Yuan
+    swap(a.bilinear_len_o, b.bilinear_len_o);
     swap(a.block_indices, b.block_indices);
     swap(a.mpi_group, b.mpi_group);
     swap(a.mpi_comm, b.mpi_comm);

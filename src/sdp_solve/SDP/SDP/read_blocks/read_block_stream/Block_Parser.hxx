@@ -11,11 +11,13 @@ using namespace std::string_literals;
 struct Block_Parser
     : public rapidjson::BaseReaderHandler<rapidjson::UTF8<>, Block_Parser>
 {
-  bool inside = false, parsing_dim = false, parsing_num_points = false,
+  bool inside = false, parsing_dim = false, parsing_num_points = false, 
+       parsing_bilinear_len_e = false, parsing_bilinear_len_o = false,
        parsing_c = false, parsing_B = false,
        parsing_bilinear_bases_even = false, parsing_bilinear_bases_odd = false;
 
   const std::string dim_name = "dim"s, num_points_name = "num_points"s;
+  const std::string bilinear_len_e_name = "bilinear_len_e"s, bilinear_len_o_name = "bilinear_len_o"s;
   Vector_State<Number_State<El::BigFloat>> c_state;
   Vector_State<Vector_State<Number_State<El::BigFloat>>> B_state,
     bilinear_bases_even_state, bilinear_bases_odd_state;
@@ -37,6 +39,14 @@ struct Block_Parser
     else if(parsing_num_points)
       {
         parsing_num_points = false;
+      }
+    else if(parsing_bilinear_len_e)
+      {
+        parsing_bilinear_len_e = false;
+      }
+    else if(parsing_bilinear_len_o)
+      {
+        parsing_bilinear_len_o = false;
       }
     else
       {

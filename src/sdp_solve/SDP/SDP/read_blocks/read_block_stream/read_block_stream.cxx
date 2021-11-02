@@ -1,5 +1,6 @@
 #include "Block_Parser.hxx"
 #include "../../../../SDP.hxx"
+// #include <iostream>
 
 #include <rapidjson/istreamwrapper.h>
 
@@ -11,6 +12,8 @@ namespace
     const size_t height(input.size()),
       width(input.empty() ? 1 : input.at(0).size());
     local.Resize(height, width);
+    // std::cout << height << std::endl;
+    // std::cout << width << std::endl;
     for(size_t row(0); row != height; ++row)
       {
         for(size_t column(0); column != width; ++column)

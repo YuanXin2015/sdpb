@@ -32,6 +32,8 @@ public:
   size_t block_index;
   size_t dim;
   size_t degree;
+  size_t bilinear_len_e;
+  size_t bilinear_len_o;
 
   // constraint_matrix = B, a P'xN Matrix
   El::Matrix<El::BigFloat> constraint_matrix;

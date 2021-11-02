@@ -45,6 +45,14 @@ bool Block_Parser::Key(const Ch *str, rapidjson::SizeType length, bool)
         {
           parsing_num_points = true;
         }
+      else if(key == bilinear_len_e_name)
+        {
+          parsing_bilinear_len_e = true;
+        }
+      else if(key == bilinear_len_o_name)
+        {
+          parsing_bilinear_len_o = true;
+        }
       else if(key == bilinear_bases_even_state.name)
         {
           parsing_bilinear_bases_even = true;

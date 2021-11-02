@@ -6,5 +6,7 @@ void write_blocks(std::ostream &output_stream,
                   const Dual_Constraint_Group &group)
 {
   output_stream << "  \"dim\": " << group.dim
-                << ",\n  \"num_points\": " << (group.degree + 1) << ",\n";
+                << ",\n  \"num_points\": " << (group.degree + 1) 
+                << ",\n  \"bilinear_len_e\": " << (group.bilinear_len_e) 
+                << ",\n  \"bilinear_len_o\": " << (group.bilinear_len_o) << ",\n";
 }
