@@ -23,7 +23,8 @@ public:
   Vector_State<Polynomial_Vector_State> elements_state;
   Vector_State<Number_State<El::BigFloat>> sample_points_state;
   Vector_State<Number_State<El::BigFloat>> sample_scalings_state;
-  Vector_State<Polynomial_State> bilinear_basis_state;
+  Vector_State<Polynomial_State> bilinear_basis_e_state;
+  Vector_State<Polynomial_State> bilinear_basis_o_state;
 
   Polynomial_Vector_Matrix_State(
     const std::vector<std::string> &names, const size_t &offset,
@@ -35,7 +36,8 @@ public:
           {"elements"s, "polynomialVector"s, "polynomial"s, "coeff"s}),
         sample_points_state({"samplePoints"s, "elt"s}),
         sample_scalings_state({"sampleScalings"s, "elt"s}),
-        bilinear_basis_state({"bilinearBasis"s, "polynomial"s, "coeff"s})
+        bilinear_basis_e_state({"bilinearBasis_e"s, "polynomial"s, "coeff"s}),
+        bilinear_basis_o_state({"bilinearBasis_o"s, "polynomial"s, "coeff"s})
   {}
 
   bool xml_on_start_element(const std::string &element_name)
@@ -53,7 +55,8 @@ public:
         else if(!(elements_state.xml_on_start_element(element_name)
                   || sample_points_state.xml_on_start_element(element_name)
                   || sample_scalings_state.xml_on_start_element(element_name)
-                  || bilinear_basis_state.xml_on_start_element(element_name)))
+                  || bilinear_basis_e_state.xml_on_start_element(element_name)
+                  || bilinear_basis_o_state.xml_on_start_element(element_name)))
           {
             throw std::runtime_error(
               "Inside polynomialVectorMatrix, expected 'rows', 'cols', "
@@ -68,7 +71,8 @@ public:
         elements_state.value.clear();
         sample_points_state.value.clear();
         sample_scalings_state.value.clear();
-        bilinear_basis_state.value.clear();
+        bilinear_basis_e_state.value.clear();
+        bilinear_basis_o_state.value.clear();
         rows_string.clear();
         columns_string.clear();
       }
@@ -125,11 +129,18 @@ public:
                 std::swap(value.sample_scalings, sample_scalings_state.value);
               }
           }
-        else if(bilinear_basis_state.xml_on_end_element(element_name))
+        else if(bilinear_basis_e_state.xml_on_end_element(element_name))
           {
-            if(!bilinear_basis_state.inside)
+            if(!bilinear_basis_e_state.inside)
               {
-                swap(value.bilinear_basis, bilinear_basis_state.value);
+                swap(value.bilinear_basis_e, bilinear_basis_e_state.value);
+              }
+          }
+        else if(bilinear_basis_o_state.xml_on_end_element(element_name))
+          {
+            if(!bilinear_basis_o_state.inside)
+              {
+                swap(value.bilinear_basis_o, bilinear_basis_o_state.value);
               }
           }
       }
@@ -155,7 +166,8 @@ public:
             elements_state.xml_on_characters(characters, length)
               || sample_points_state.xml_on_characters(characters, length)
               || sample_scalings_state.xml_on_characters(characters, length)
-              || bilinear_basis_state.xml_on_characters(characters, length);
+              || bilinear_basis_e_state.xml_on_characters(characters, length)
+              || bilinear_basis_o_state.xml_on_characters(characters, length);
           }
       }
     return inside;

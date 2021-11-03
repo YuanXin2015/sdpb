@@ -29,8 +29,8 @@ sample_bilinear_basis(const int maxDegree, const int numSamples,
 Dual_Constraint_Group::Dual_Constraint_Group(const size_t &Block_index,
                                              const Polynomial_Vector_Matrix &m)
     : block_index(Block_index), dim(m.rows), degree(m.sample_points.size() - 1), 
-      bilinear_len_e(m.bilinear_basis.size()),
-      bilinear_len_o(m.bilinear_basis.size())
+      bilinear_len_e(m.bilinear_basis_e.size()),
+      bilinear_len_o(m.bilinear_basis_o.size())
 {
   assert(m.rows == m.cols);
 
@@ -80,7 +80,7 @@ Dual_Constraint_Group::Dual_Constraint_Group(const size_t &Block_index,
       bilinear_len_e = degree / 2 + 1;
     }
   bilinear_bases[0] = sample_bilinear_basis(
-    bilinear_len_e - 1, numSamples, m.bilinear_basis, m.sample_points, m.sample_scalings);
+    bilinear_len_e - 1, numSamples, m.bilinear_basis_e, m.sample_points, m.sample_scalings);
 
   // For degree==0, the second block will have zero size.
   // const size_t delta2((degree + 1) / 2 - 1);
@@ -97,5 +97,5 @@ Dual_Constraint_Group::Dual_Constraint_Group(const size_t &Block_index,
       scaled_samples.emplace_back(m.sample_points[ii] * m.sample_scalings[ii]);
     }
   bilinear_bases[1] = sample_bilinear_basis(
-    bilinear_len_o - 1, numSamples, m.bilinear_basis, m.sample_points, scaled_samples);
+    bilinear_len_o - 1, numSamples, m.bilinear_basis_o, m.sample_points, scaled_samples);
 }

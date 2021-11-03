@@ -45,6 +45,8 @@ public:
 
   // bilinearBasis[m] = q_m(x) (0 <= m <= degree/2), where q_m is a
   // polynomial with degree deg(q_m) = m.
+  std::vector<Polynomial> bilinear_basis_e;
+  std::vector<Polynomial> bilinear_basis_o;
   std::vector<Polynomial> bilinear_basis;
 
   inline const std::vector<Polynomial> &elt(const int r, const int c) const
@@ -62,6 +64,8 @@ public:
     elements.clear();
     sample_points.clear();
     sample_scalings.clear();
+    bilinear_basis_e.clear();
+    bilinear_basis_o.clear();
     bilinear_basis.clear();
   }
 };
